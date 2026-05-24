@@ -1,12 +1,22 @@
 // Pequeños helpers seguros para localStorage.
-// Si el storage no está disponible (SSR, modo privado), degradan silenciosamente.
+// Si el storage no está disponible (SSR, modo privado, políticas de privacidad),
+// degradan silenciosamente. Incluso el acceso a `window.localStorage` puede
+// lanzar SecurityError, por eso el chequeo va dentro de try/catch.
 
-const isBrowser = typeof window !== 'undefined' && !!window.localStorage
+function getStorage() {
+  try {
+    if (typeof window === 'undefined') return null
+    return window.localStorage ?? null
+  } catch {
+    return null
+  }
+}
 
 export function loadJSON(key, fallback) {
-  if (!isBrowser) return fallback
+  const storage = getStorage()
+  if (!storage) return fallback
   try {
-    const raw = window.localStorage.getItem(key)
+    const raw = storage.getItem(key)
     if (raw === null) return fallback
     return JSON.parse(raw)
   } catch {
@@ -15,18 +25,20 @@ export function loadJSON(key, fallback) {
 }
 
 export function saveJSON(key, value) {
-  if (!isBrowser) return
+  const storage = getStorage()
+  if (!storage) return
   try {
-    window.localStorage.setItem(key, JSON.stringify(value))
+    storage.setItem(key, JSON.stringify(value))
   } catch {
     // quota lleno o storage bloqueado: ignorar
   }
 }
 
 export function removeKey(key) {
-  if (!isBrowser) return
+  const storage = getStorage()
+  if (!storage) return
   try {
-    window.localStorage.removeItem(key)
+    storage.removeItem(key)
   } catch {
     // ignore
   }

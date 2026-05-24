@@ -10,6 +10,7 @@ export default function ChatWindow({
   modeId,
   onPickSuggestion,
   onPickMode,
+  onRetry,
 }) {
   const scrollerRef = useRef(null)
   const mode = getMode(modeId)
@@ -63,7 +64,18 @@ export default function ChatWindow({
 
           {error && (
             <div className="error-banner" role="alert">
-              <strong>Algo salió mal:</strong> {error}
+              <div>
+                <strong>Algo salió mal:</strong> {error}
+              </div>
+              {onRetry && (
+                <button
+                  type="button"
+                  className="error-banner__retry"
+                  onClick={onRetry}
+                >
+                  ↻ Reintentar
+                </button>
+              )}
             </div>
           )}
         </div>

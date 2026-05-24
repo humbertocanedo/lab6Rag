@@ -530,6 +530,21 @@ button { font-family: inherit; }
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.inline-code {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.88em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent, var(--accent-strong)) 18%, transparent);
+  border: 1px solid var(--border-soft);
+}
+
+.message--user .inline-code {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
 .message__actions {
   display: flex;
   justify-content: space-between;
@@ -574,6 +589,10 @@ button { font-family: inherit; }
 /* ---------- Error banner ---------- */
 
 .error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   background: var(--danger-bg);
   border: 1px solid var(--danger);
   color: var(--danger);
@@ -582,6 +601,21 @@ button { font-family: inherit; }
   font-size: 13.5px;
 }
 .error-banner strong { margin-right: 4px; }
+
+.error-banner__retry {
+  flex-shrink: 0;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.1s ease;
+}
+.error-banner__retry:hover { opacity: 0.88; }
+.error-banner__retry:active { transform: translateY(1px); }
 
 /* ---------- Composer ---------- */
 

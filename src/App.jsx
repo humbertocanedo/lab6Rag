@@ -39,6 +39,7 @@ export default function App() {
           modeId={chat.modeId}
           onPickSuggestion={chat.sendMessage}
           onPickMode={chat.setModeId}
+          onRetry={chat.retryLast}
         />
         <InputBar
           onSend={chat.sendMessage}

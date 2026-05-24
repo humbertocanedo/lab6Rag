@@ -7,8 +7,31 @@ const STORAGE_KEY = 'insightmate.history.v1'
 const MODE_KEY = 'insightmate.mode.v1'
 const THEME_KEY = 'insightmate.theme.v1'
 
+// `crypto.randomUUID` no existe en navegadores antiguos ni fuera de un
+// secure context. Probamos los caminos en orden de preferencia y caemos a un
+// generador propio basado en Math.random como último recurso.
+function generateId() {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID()
+    }
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const bytes = new Uint8Array(16)
+      crypto.getRandomValues(bytes)
+      return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+    }
+  } catch {
+    // sigue al fallback
+  }
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).slice(2, 10) +
+    Math.random().toString(36).slice(2, 10)
+  )
+}
+
 const createMessage = (role, content, extra = {}) => ({
-  id: crypto.randomUUID(),
+  id: generateId(),
   role,
   content,
   createdAt: Date.now(),
@@ -97,6 +120,21 @@ export function useChat() {
     abortRef.current?.abort()
   }, [])
 
+  // Reintenta el último mensaje del usuario: lo quita del historial visible
+  // (para no duplicarlo) y lo vuelve a enviar.
+  const retryLast = useCallback(() => {
+    if (isLoading) return
+    const lastUser = [...messages].reverse().find((m) => m.role === 'user')
+    if (!lastUser) return
+    setMessages((prev) => {
+      const idx = prev.map((m) => m.id).lastIndexOf(lastUser.id)
+      return idx === -1 ? prev : prev.slice(0, idx)
+    })
+    setError(null)
+    // pequeño defer para que el setMessages se aplique antes de re-enviar
+    setTimeout(() => sendMessage(lastUser.content), 0)
+  }, [isLoading, messages, sendMessage])
+
   const clearConversation = useCallback(() => {
     abortRef.current?.abort()
     setMessages([])
@@ -116,6 +154,7 @@ export function useChat() {
     setModeId,
     sendMessage,
     stop,
+    retryLast,
     clearConversation,
     theme,
     toggleTheme,
